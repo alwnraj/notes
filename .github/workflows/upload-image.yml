@@ -1,0 +1,35 @@
+name: Upload Image to Gallery
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_data:
+        description: 'Base64 encoded image data'
+        required: true
+        type: string
+      filename:
+        description: 'Image filename'
+        required: true
+        type: string
+
+jobs:
+  upload-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Create images directory
+        run: mkdir -p notetaking/images
+        
+      - name: Decode and save image
+        run: |
+          echo "${{ github.event.inputs.image_data }}" | base64 -d > "notetaking/images/${{ github.event.inputs.filename }}"
+          
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Add image: ${{ github.event.inputs.filename }}"
+          git push
